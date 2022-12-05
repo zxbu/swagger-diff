@@ -1,11 +1,6 @@
 package com.deepoove.swagger.diff;
 
-import java.io.IOException;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.alibaba.fastjson.JSON;
 import com.deepoove.swagger.diff.compare.SpecificationDiff;
 import com.deepoove.swagger.diff.model.ChangedEndpoint;
 import com.deepoove.swagger.diff.model.Endpoint;
@@ -15,10 +10,19 @@ import io.swagger.models.Swagger;
 import io.swagger.models.auth.AuthorizationValue;
 import io.swagger.parser.SwaggerCompatConverter;
 import io.swagger.parser.SwaggerParser;
+import io.swagger.parser.util.RemoteUrl;
+
+import java.io.IOException;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SwaggerDiff {
 
     public static final String SWAGGER_VERSION_V2 = "2.0";
+
+    public static final String SWAGGER_VERSION_V3 = "3.0";
 
     private static Logger logger = LoggerFactory.getLogger(SwaggerDiff.class);
 
@@ -37,7 +41,7 @@ public class SwaggerDiff {
      * @param newSpec
      *            new api-doc location:Json or Http
      */
-    public static SwaggerDiff compareV1(String oldSpec, String newSpec) {
+    public static SwaggerDiff compareV1(String oldSpec, String newSpec) throws Exception {
         return compare(oldSpec, newSpec, null, null);
     }
 
@@ -49,7 +53,7 @@ public class SwaggerDiff {
      * @param newSpec
      *            new api-doc location:Json or Http
      */
-    public static SwaggerDiff compareV2(String oldSpec, String newSpec) {
+    public static SwaggerDiff compareV2(String oldSpec, String newSpec) throws Exception {
         return compare(oldSpec, newSpec, null, SWAGGER_VERSION_V2);
     }
 
@@ -77,7 +81,7 @@ public class SwaggerDiff {
     }
 
     public static SwaggerDiff compare(String oldSpec, String newSpec,
-            List<AuthorizationValue> auths, String version) {
+            List<AuthorizationValue> auths, String version) throws Exception {
         return new SwaggerDiff(oldSpec, newSpec, auths, version).compare();
     }
 
@@ -103,11 +107,14 @@ public class SwaggerDiff {
      * @param version
      */
     private SwaggerDiff(String oldSpec, String newSpec, List<AuthorizationValue> auths,
-            String version) {
+            String version) throws Exception {
         if (SWAGGER_VERSION_V2.equals(version)) {
             SwaggerParser swaggerParser = new SwaggerParser();
             oldSpecSwagger = swaggerParser.read(oldSpec, auths, true);
             newSpecSwagger = swaggerParser.read(newSpec, auths, true);
+        } else if (SWAGGER_VERSION_V3.equals(version)) {
+            oldSpecSwagger = JSON.parseObject(RemoteUrl.urlToString(oldSpec, auths), Swagger.class);
+            newSpecSwagger = JSON.parseObject(RemoteUrl.urlToString(newSpec, auths), Swagger.class);
         } else {
             SwaggerCompatConverter swaggerCompatConverter = new SwaggerCompatConverter();
             try {

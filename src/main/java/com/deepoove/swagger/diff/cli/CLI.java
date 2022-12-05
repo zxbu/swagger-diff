@@ -29,11 +29,9 @@ public class CLI {
     private String newSpec;
 
     @Parameter(names = "-v", description = "swagger version:1.0 or 2.0", validateWith=  RegexValidator.class, order = 2)
-    @Regex("(2\\.0|1\\.0)")
     private String version = SwaggerDiff.SWAGGER_VERSION_V2;
 
     @Parameter(names = "-output-mode", description = "render mode: markdown, html or json", validateWith = RegexValidator.class, order = 3)
-    @Regex("(markdown|html|json)")
     private String outputMode = OUTPUT_MODE_MARKDOWN;
 
     @Parameter(names = "--help", help = true, order = 5)
@@ -42,7 +40,10 @@ public class CLI {
     @Parameter(names = "--version", description = "swagger-diff tool version", help = true, order = 6)
     private boolean v;
 
-    public static void main(String[] args) {
+    @Parameter(names = "--new-sprint")
+    private Integer newSprint;
+
+    public static void main(String[] args) throws Exception {
         CLI cli = new CLI();
         JCommander jCommander = JCommander.newBuilder()
             .addObject(cli)
@@ -51,7 +52,7 @@ public class CLI {
         cli.run(jCommander);
     }
 
-    public void run(JCommander jCommander) {
+    public void run(JCommander jCommander) throws Exception {
         if (help){
             jCommander.setProgramName("java -jar swagger-diff.jar");
             jCommander.usage();
@@ -62,17 +63,20 @@ public class CLI {
             return;
         }
 
-        SwaggerDiff diff = SwaggerDiff.SWAGGER_VERSION_V2.equals(version)
-                ? SwaggerDiff.compareV2(oldSpec, newSpec) : SwaggerDiff.compareV1(oldSpec, newSpec);
+        SwaggerDiff diff = SwaggerDiff.compare(oldSpec, newSpec, null, version);
 
-        String render = getRender(outputMode).render(diff);
+//        SwaggerDiff diff = SwaggerDiff.SWAGGER_VERSION_V2.equals(version)
+//                ? SwaggerDiff.compareV2(oldSpec, newSpec) : SwaggerDiff.compareV1(oldSpec, newSpec);
+
+        String render = getRender(outputMode, newSprint).render(diff);
         JCommander.getConsole().println(render);
     }
 
-    private Render getRender(String outputMode) {
+    private Render getRender(String outputMode, Integer newSprint) {
         if (OUTPUT_MODE_MARKDOWN.equals(outputMode)) {
-            return new MarkdownRender();
-        } else if (OUTPUT_MODE_JSON.equals(outputMode)) {
+            return new MarkdownRender(newSprint);
+        }
+        if (OUTPUT_MODE_JSON.equals(outputMode)) {
             return new JsonRender();
         }
         return new HtmlRender("Changelog", "http://deepoove.com/swagger-diff/stylesheets/demo.css");
@@ -94,5 +98,8 @@ public class CLI {
         return outputMode;
     }
 
+    public Integer getNewSprint() {
+        return newSprint;
+    }
 
 }

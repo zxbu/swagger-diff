@@ -1,11 +1,15 @@
 package com.deepoove.swagger.diff.compare;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.alibaba.fastjson.JSONObject;
 import com.deepoove.swagger.diff.model.ChangedParameter;
 import com.deepoove.swagger.diff.model.ElProperty;
 import com.google.common.collect.Lists;
@@ -49,6 +53,9 @@ public class ParameterDiff {
         if (null == left) left = new ArrayList<>();
         if (null == right) right = new ArrayList<>();
 
+        format(left);
+        format(right);
+
         ListDiff<Parameter> paramDiff = ListDiff.diff(left, right, (t, param) -> {
             for (Parameter para : t) {
                 if (param.getName().equals(para.getName())) { return para; }
@@ -89,8 +96,8 @@ public class ParameterDiff {
             }
 
             // is requried
-            boolean rightRequired = rightPara.getRequired();
-            boolean leftRequired = leftPara.getRequired();
+            boolean rightRequired = Objects.equals(rightPara.getRequired(), true);
+            boolean leftRequired = Objects.equals(leftPara.getRequired(), true);
             changedParameter.setChangeRequired(leftRequired != rightRequired);
 
             // description
@@ -107,6 +114,18 @@ public class ParameterDiff {
         });
 
         return this;
+    }
+
+    private void format(List<Parameter> left) {
+        for (Parameter parameter : left) {
+            if (Proxy.isProxyClass(parameter.getClass())) {
+                InvocationHandler invocationHandler = Proxy.getInvocationHandler(parameter);
+                if (invocationHandler instanceof JSONObject) {
+                    JSONObject jsonObject = (JSONObject) invocationHandler;
+                    jsonObject.put("required", Objects.equals(jsonObject.get("required"), true));
+                }
+            }
+        }
     }
 
     private Property mapToProperty(Parameter rightPara) {

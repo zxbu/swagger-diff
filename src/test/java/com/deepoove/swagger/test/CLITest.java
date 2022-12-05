@@ -67,7 +67,7 @@ public class CLITest {
     }
 
     @Test
-    public void testHelp() {
+    public void testHelp() throws Exception {
         CLI cli = new CLI();
         String[] argv = { "--help" };
         JCommander jCommander = JCommander.newBuilder().addObject(cli).build();
@@ -77,7 +77,7 @@ public class CLITest {
     }
     
     @Test
-    public void testVersion() {
+    public void testVersion() throws Exception {
         CLI cli = new CLI();
         String[] argv = { "--version" };
         JCommander jCommander = JCommander.newBuilder().addObject(cli).build();
@@ -87,7 +87,7 @@ public class CLITest {
     }
     
     @Test
-    public void testMain() {
+    public void testMain() throws Exception {
         CLI cli = new CLI();
         String[] argv = { "-old", "petstore_v2_1.json", "-new", "petstore_v2_2.json" };
         JCommander jCommander = JCommander.newBuilder().addObject(cli).build();

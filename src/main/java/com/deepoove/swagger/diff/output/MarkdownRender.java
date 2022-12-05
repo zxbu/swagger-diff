@@ -3,6 +3,7 @@ package com.deepoove.swagger.diff.output;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 import com.deepoove.swagger.diff.SwaggerDiff;
 import com.deepoove.swagger.diff.model.*;
@@ -22,7 +23,11 @@ public class MarkdownRender implements Render {
     final String LI = "* ";
     final String HR = "---\n";
 
-    public MarkdownRender() {}
+    private Integer newSprint;
+
+    public MarkdownRender(Integer newSprint) {
+        this.newSprint = newSprint;
+    }
 
     public String render(SwaggerDiff diff) {
         List<Endpoint> newEndpoints = diff.getNewEndpoints();
@@ -40,7 +45,12 @@ public class MarkdownRender implements Render {
     public String renderHtml(String oldVersion, String newVersion, String ol_new, String ol_miss,
                              String ol_changed) {
         StringBuffer sb = new StringBuffer();
-        sb.append(H2).append("Version " + oldVersion + " to " + newVersion).append("\n").append(HR);
+        if (!Objects.equals(oldVersion, newVersion)) {
+            sb.append(H2).append("Version " + oldVersion + " to " + newVersion).append("\n").append(HR);
+        }
+        if (newSprint != null) {
+            sb.append(H2).append("Sprint " + (newSprint-1) + " to " + newSprint).append("\n").append(HR);
+        }
         sb.append(H3).append("What's New").append("\n").append(HR)
                 .append(ol_new).append("\n").append(H3)
                 .append("What's Deprecated").append("\n").append(HR)

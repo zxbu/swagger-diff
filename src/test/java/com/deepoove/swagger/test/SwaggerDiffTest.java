@@ -28,13 +28,13 @@ public class SwaggerDiffTest {
 	final String SWAGGER_V2_HTTP = "http://petstore.swagger.io/v2/swagger.json";
 
 	@Test
-	public void testEqual() {
+	public void testEqual() throws Exception {
 		SwaggerDiff diff = SwaggerDiff.compareV2(SWAGGER_V2_DOC2, SWAGGER_V2_DOC2);
 		assertEqual(diff);
 	}
 
 	@Test
-	public void testNewApi() {
+	public void testNewApi() throws Exception {
 		SwaggerDiff diff = SwaggerDiff.compareV2(SWAGGER_V2_EMPTY_DOC, SWAGGER_V2_DOC2);
 		List<Endpoint> newEndpoints = diff.getNewEndpoints();
 		List<Endpoint> missingEndpoints = diff.getMissingEndpoints();
@@ -59,7 +59,7 @@ public class SwaggerDiffTest {
 	}
 
 	@Test
-	public void testDeprecatedApi() {
+	public void testDeprecatedApi() throws Exception {
 		SwaggerDiff diff = SwaggerDiff.compareV2(SWAGGER_V2_DOC1, SWAGGER_V2_EMPTY_DOC);
 		List<Endpoint> newEndpoints = diff.getNewEndpoints();
 		List<Endpoint> missingEndpoints = diff.getMissingEndpoints();
@@ -84,7 +84,7 @@ public class SwaggerDiffTest {
 	}
 	
 	@Test
-	public void testDiff() {
+	public void testDiff() throws Exception {
 		SwaggerDiff diff = SwaggerDiff.compareV2(SWAGGER_V2_DOC1, SWAGGER_V2_DOC2);
 		List<ChangedEndpoint> changedEndPoints = diff.getChangedEndpoints();
 		String html = new HtmlRender("Changelog",
@@ -105,9 +105,9 @@ public class SwaggerDiffTest {
 	}
 	
 	@Test
-	public void testDiffAndMarkdown() {
+	public void testDiffAndMarkdown() throws Exception {
 		SwaggerDiff diff = SwaggerDiff.compareV2(SWAGGER_V2_DOC1, SWAGGER_V2_DOC2);
-		String render = new MarkdownRender().render(diff);
+		String render = new MarkdownRender(1).render(diff);
 		try {
 			FileWriter fw = new FileWriter(
 					"testDiff.md");
@@ -180,7 +180,7 @@ public class SwaggerDiffTest {
     }
 
 	@Test
-	public void testJsonRender() {
+	public void testJsonRender() throws Exception {
 		SwaggerDiff diff = SwaggerDiff.compareV2(SWAGGER_V2_DOC1, SWAGGER_V2_DOC2);
 		String render = new JsonRender().render(diff);
 		try {
@@ -195,7 +195,7 @@ public class SwaggerDiffTest {
 	}
 
 	@Test
-	public void testInputBodyArray() {
+	public void testInputBodyArray() throws Exception {
 		SwaggerDiff diff = SwaggerDiff.compareV2(SWAGGER_V2_DOC1, SWAGGER_V2_DOC2);
 		Map<String, ChangedEndpoint> changedEndpointMap = diff.getChangedEndpoints().stream().collect(Collectors.toMap(ChangedEndpoint::getPathUrl, e -> e));
 		Lists.newArrayList("/user/createWithArray", "/user/createWithList").forEach(name -> {
@@ -223,7 +223,7 @@ public class SwaggerDiffTest {
 	}
 
 	@Test
-	public void testResponseBodyArray() {
+	public void testResponseBodyArray() throws Exception {
 		SwaggerDiff diff = SwaggerDiff.compareV2(SWAGGER_V2_DOC1, SWAGGER_V2_DOC2);
 		Map<String, ChangedEndpoint> changedEndpointMap = diff.getChangedEndpoints().stream().collect(Collectors.toMap(ChangedEndpoint::getPathUrl, e -> e));
 		Lists.newArrayList("/pet/findByStatus", "/pet/findByTags").forEach(name -> {
@@ -246,7 +246,7 @@ public class SwaggerDiffTest {
 	}
 
 	@Test
-	public void testDetectProducesAndConsumes() {
+	public void testDetectProducesAndConsumes() throws Exception {
 		SwaggerDiff diff = SwaggerDiff.compareV2(SWAGGER_V2_DOC1, SWAGGER_V2_DOC2);
 		Map<String, ChangedEndpoint> changedEndpointMap = diff.getChangedEndpoints().stream().collect(Collectors.toMap(ChangedEndpoint::getPathUrl, e -> e));
 		Assert.assertTrue("Expecting changed endpoint " + "/store/order", changedEndpointMap.containsKey("/store/order"));
@@ -260,7 +260,7 @@ public class SwaggerDiffTest {
 	}
 
 	@Test
-	public void testChangedPropertyMetadata() {
+	public void testChangedPropertyMetadata() throws Exception {
 		SwaggerDiff diff = SwaggerDiff.compareV2(SWAGGER_V2_DOC1, SWAGGER_V2_DOC2);
 		Map<String, ChangedEndpoint> changedEndpointMap = diff.getChangedEndpoints().stream().collect(Collectors.toMap(ChangedEndpoint::getPathUrl, e -> e));
 		String postOrder = "/store/order";
